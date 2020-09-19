@@ -1,23 +1,40 @@
-const rp = require("request-promise");
-import User from "../model/user";
-import wiki from "./wiki";
+const axios = require('axios').default;
+import User from '../model/user';
+import wiki from './wiki';
+
+// Type of the request data input could be defined instead of just taking any
+
+// type AccessTokenRequest = {
+//   client_id: string;
+//   client_secret: string;
+//   code: string;
+// };
+
+// type SlackPostMessageRequest = {
+//   token: string,
+//   channel: string,
+//   text: string,
+// };
 
 export const getAccessToken = async (data) => {
-  const options = {
-    method: "POST",
-    uri: "https://slack.com/api/oauth.v2.access",
-    form: data,
-  };
-
-  const authDetails = await rp(options);
-  console.log(JSON.parse(authDetails));
-  return JSON.parse(authDetails);
+  try {
+    const authDetails = await axios.post(
+      'https://slack.com/api/oauth.v2.access',
+      data
+    );
+    return JSON.parse(authDetails);
+  } catch (err) {
+    console.error('Error getting access token from slack', err);
+    throw new Error(err);
+  }
 };
 
 export const sendScrappData = async () => {
   try {
-    const users = await User.find();
+    const users = await User.find({});
     const scrappData = await wiki();
+
+    // This could be Promise.all() instead of waiting every request to go through synchronously
     users.forEach(async (user) => {
       const data = {
         token: user.accessToken,
@@ -25,13 +42,7 @@ export const sendScrappData = async () => {
         text: scrappData,
       };
 
-      const options = {
-        method: "POST",
-        uri: "https://slack.com/api/chat.postMessage",
-        form: data,
-      };
-
-      await rp(options);
+      await axios.post('https://slack.com/api/chat.postMessage', data);
     });
   } catch (err) {
     console.log(err);
