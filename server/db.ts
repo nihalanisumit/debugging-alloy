@@ -1,18 +1,14 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-
 dotenv.config();
+import config from '../env';
 
 const dbConnect = () =>
   new Promise((resolve, reject) => {
-    mongoose.connect('xxx-xxxx-xxx-xxxx', {
-      useNewUrlParser: true,
-      poolsize: 0,
+    mongoose.set('useNewUrlParser', true);
+    mongoose.connect(config.databaseUrl, {
       useCreateIndex: true,
       useUnifiedTopology: true,
-      socketOptions: {
-        socketTimeoutMS: 600
-      }
     });
 
     mongoose.connection.on('connected', () => {
@@ -26,7 +22,7 @@ const dbConnect = () =>
     });
 
     mongoose.connection.on('disconnected', () => {
-        console.log('Mongoose default connection disconnected');
+      console.log('Mongoose default connection disconnected');
     });
   });
 
