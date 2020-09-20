@@ -1,6 +1,7 @@
 const axios = require('axios').default;
 import User from '../model/user';
 import wiki from './wiki';
+const { WebClient } = require('@slack/web-api');
 
 // Type of the request data input could be defined instead of just taking any
 
@@ -17,12 +18,17 @@ import wiki from './wiki';
 // };
 
 export const getAccessToken = async (data) => {
+  console.log('dataaa', data);
   try {
-    const authDetails = await axios.post(
-      'https://slack.com/api/oauth.v2.access',
-      data
-    );
-    return JSON.parse(authDetails);
+    // const authDetails = await axios.post(
+    //   'https://slack.com/api/oauth.v2.access',
+    //   data
+    // );
+    // console.log('response', authDetails.data);
+    // return authDetails.data;
+    const result = await new WebClient().oauth.v2.access(data);
+    console.log(result);
+    return result;
   } catch (err) {
     console.error('Error getting access token from slack', err);
     throw new Error(err);

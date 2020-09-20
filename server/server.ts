@@ -20,6 +20,7 @@ app.get('/auth/redirect', async function (req, res) {
   if (!req.query.code) {
     return;
   }
+  console.log('code', req.query.code);
   try {
     var data = {
       client_id: process.env.CLIENT_ID,
@@ -33,6 +34,8 @@ app.get('/auth/redirect', async function (req, res) {
     if (response.ok === false && response.error) {
       throw new Error(response.error);
     }
+
+    // SN would consider expiring access token after some hours by creating TTL index: https://docs.mongodb.com/manual/tutorial/expire-data/
     const user = {
       userId: response.authed_user.id,
       accessToken: response.access_token,
@@ -42,7 +45,7 @@ app.get('/auth/redirect', async function (req, res) {
     res.sendFile(path.resolve(__dirname + '/../../public/success.html'));
   } catch (err) {
     console.log(err);
-    res.status(400).send(err);
+    res.sendFile(path.resolve(__dirname + '/../../public/failed.html'));
   }
 });
 
